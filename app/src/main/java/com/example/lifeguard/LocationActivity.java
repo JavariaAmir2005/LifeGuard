@@ -47,7 +47,6 @@ public class LocationActivity extends AppCompatActivity {
     DatabaseReference contactRef;
     SpeechRecognizer speechRecognizer;
     Intent speechIntent;
-
     private static final int REQ = 100;
 
     TextView tvLat, tvLon, tvAddr;

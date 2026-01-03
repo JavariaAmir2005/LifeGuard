@@ -15,7 +15,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Use MaterialButton instead of Button
         MaterialButton btnstart = findViewById(R.id.btnstart);
-
         btnstart.setOnClickListener(v ->
                 startActivity(new Intent(MainActivity.this, RegisterActivity.class))
         );

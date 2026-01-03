@@ -26,7 +26,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_HISTORY_ID = "id";
     public static final String COL_HISTORY_TYPE = "type";
     public static final String COL_HISTORY_TIME = "time";
-
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }

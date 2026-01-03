@@ -1,14 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#FFFFFF"
     android:padding="16dp"
+    android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <EditText
+        android:id="@+id/etName"
+        android:hint="Contact Name"
+        android:backgroundTint="#BDBDBD"
+        android:textColor="#212121"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/etPhone"
+        android:hint="Phone Number"
+        android:inputType="phone"
+        android:backgroundTint="#BDBDBD"
+        android:textColor="#212121"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnAdd"
+        android:text="Add Contact"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1976D2"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:hint="Search contacts"
+            android:backgroundTint="#BDBDBD"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btnSync"
+            android:text="Sync"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#1976D2"
+            android:layout_marginStart="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Contacts List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewContacts"
+        android:layout_marginTop="18dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>

@@ -8,7 +8,6 @@
     android:padding="24dp"
     android:background="#eaf0e6"> <!-- Light yellow background -->
 
-
     <ImageView
         android:layout_width="400dp"
         android:layout_height="200dp"

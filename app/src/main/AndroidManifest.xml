@@ -21,7 +21,25 @@
         android:icon="@drawable/lg_icon"
         android:roundIcon="@drawable/lg_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LifeGuard">
+        android:theme="@style/Theme.lifeguard">
+        <activity
+            android:name=".SyncedContactsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SOSActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddEditContactActivity"
+            android:exported="false" />
         <activity
             android:name=".ContactsActivity"
             android:exported="false" />
