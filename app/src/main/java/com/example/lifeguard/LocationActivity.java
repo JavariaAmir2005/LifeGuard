@@ -1,5 +1,6 @@
 package com.example.lifeguard;
 
+import android.content.Intent;
 import android.telephony.SmsManager;
 
 import android.Manifest;
@@ -15,6 +16,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.speech.SpeechRecognizer;
+import android.speech.RecognizerIntent;
+import android.speech.RecognitionListener;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +45,8 @@ public class LocationActivity extends AppCompatActivity {
     private static final int SMS_REQ = 200;
     FirebaseAuth auth;
     DatabaseReference contactRef;
+    SpeechRecognizer speechRecognizer;
+    Intent speechIntent;
 
     private static final int REQ = 100;
 
@@ -59,15 +67,15 @@ public class LocationActivity extends AppCompatActivity {
         tvAddr = findViewById(R.id.tvAddr);
 
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
 
         sosRef = FirebaseDatabase.getInstance()
                 .getReference("SOS")
-                .child("user_123"); // Replace with FirebaseAuth UID later
+                .child(user.getUid()); // Replace with FirebaseAuth UID later
 
         findViewById(R.id.btnGet).setOnClickListener(v -> getLocation());
-        auth = FirebaseAuth.getInstance();
 
-        FirebaseUser user = auth.getCurrentUser();
 
         if (user != null) {
             contactRef = FirebaseDatabase.getInstance()
@@ -185,6 +193,8 @@ public class LocationActivity extends AppCompatActivity {
                 Locale.getDefault()
         ).format(new Date());
 
+        if (sosRef == null) return;
+
         sosRef.child("latitude").setValue(lat);
         sosRef.child("longitude").setValue(lon);
         sosRef.child("address").setValue(addressText);
@@ -253,6 +263,71 @@ public class LocationActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private void startVoiceSOS() {
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+
+        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        );
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+
+            @Override
+            public void onResults(Bundle results) {
+
+                ArrayList<String> words =
+                        results.getStringArrayList(
+                                SpeechRecognizer.RESULTS_RECOGNITION
+                        );
+
+                if (words != null) {
+                    for (String word : words) {
+
+                        word = word.toLowerCase();
+
+                        if (word.contains("help") || word.contains("sos")) {
+
+                            Toast.makeText(
+                                    LocationActivity.this,
+                                    "Voice SOS Activated",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            if (!checkSmsPermission()) {
+                                Toast.makeText(LocationActivity.this, getString(R.string.sms_permission_needed_to_send_sos), Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            Location lastLoc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            if (lastLoc == null) lastLoc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+                            if (lastLoc != null) {
+                                triggerSOS(lastLoc);
+                            } else {
+                                Toast.makeText(LocationActivity.this, "Location not available for voice SOS", Toast.LENGTH_SHORT).show();
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            public void onReadyForSpeech(Bundle params) {}
+            public void onBeginningOfSpeech() {}
+            public void onRmsChanged(float rmsdB) {}
+            public void onBufferReceived(byte[] buffer) {}
+            public void onEndOfSpeech() {}
+            public void onError(int error) {}
+            public void onPartialResults(Bundle partialResults) {}
+            public void onEvent(int eventType, Bundle params) {}
+        });
+
+        speechRecognizer.startListening(speechIntent);
     }
 
 

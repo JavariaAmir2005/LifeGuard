@@ -7,4 +7,5 @@
     <string name="name">Name</string>
     <string name="password">Password</string>
     <string name="start">Get Started</string>
+    <string name="sms_permission_needed_to_send_sos">SMS permission needed to send SOS</string>
 </resources>
