@@ -1,5 +1,6 @@
 package com.example.lifeguard;
 
+import android.telephony.SmsManager;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -26,7 +27,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class LocationActivity extends AppCompatActivity {
+    private static final int SMS_REQ = 200;
+    FirebaseAuth auth;
+    DatabaseReference contactRef;
 
     private static final int REQ = 100;
 
@@ -53,6 +65,17 @@ public class LocationActivity extends AppCompatActivity {
                 .child("user_123"); // Replace with FirebaseAuth UID later
 
         findViewById(R.id.btnGet).setOnClickListener(v -> getLocation());
+        auth = FirebaseAuth.getInstance();
+
+        FirebaseUser user = auth.getCurrentUser();
+
+        if (user != null) {
+            contactRef = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(user.getUid())
+                    .child("emergencyContacts");
+        }
+
     }
 
     private void showLoading() {
@@ -137,6 +160,11 @@ public class LocationActivity extends AppCompatActivity {
         } catch (Exception e) {
             tvAddr.setText("Geocoder error");
         }
+        sendSMS(
+                "SOS! I need help.\n" +
+                        tvAddr.getText().toString()
+        );
+
     }
 
     private void triggerSOS(Location loc) {
@@ -164,15 +192,94 @@ public class LocationActivity extends AppCompatActivity {
 
         Toast.makeText(this, "🚨 SOS Sent Successfully!", Toast.LENGTH_LONG).show();
     }
+    private boolean checkSmsPermission() {
+        if (checkSelfPermission(Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{Manifest.permission.SEND_SMS},
+                    SMS_REQ
+            );
+            return false;
+        }
+        return true;
+    }
+    private void sendSMS(String message) {
+
+        if (!checkSmsPermission()) return;
+
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SmsManager smsManager = SmsManager.getDefault();
+
+        contactRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (!snapshot.exists()) {
+                    Toast.makeText(LocationActivity.this,
+                            "No emergency contacts found",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                for (DataSnapshot snap : snapshot.getChildren()) {
+                    String phone = snap.child("phone").getValue(String.class);
+
+                    if (phone != null && !phone.isEmpty()) {
+                        smsManager.sendTextMessage(
+                                phone,
+                                null,
+                                message,
+                                null,
+                                null
+                        );
+                    }
+                }
+
+                Toast.makeText(LocationActivity.this,
+                        "SOS sent to emergency contacts",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(LocationActivity.this,
+                        "Failed to fetch contacts",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(
+                requestCode, permissions, grantResults);
+
+        if (requestCode == REQ &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             getLocation();
         }
+
+        if (requestCode == SMS_REQ &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            Toast.makeText(this,
+                    "SMS permission granted",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
+
 }
