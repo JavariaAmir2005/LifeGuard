@@ -1,8 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="#FFFFFF"
+    android:background="#FFF5F5"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -29,8 +30,18 @@
         android:backgroundTint="#D32F2F"
         android:textColor="#FFFFFF"
         android:layout_marginTop="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
+        android:layout_width="130dp"
+        android:layout_height="130dp"/>
+
+    <Button
+        android:id="@+id/VoiceSOS"
+        android:text="Voice SOS"
+        android:backgroundTint="#D32F2F"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="12dp"
+        android:layout_width="130dp"
+        android:layout_height="130dp"/>
+
 
     <Button
         android:id="@+id/btnHistory"
@@ -43,8 +54,17 @@
     <Button
         android:id="@+id/btnProfile"
         android:text="Profile"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:backgroundTint="#BDBDBD"
         android:layout_width="match_parent"
         android:layout_height="50dp"/>
+
+    <!-- BOTTOM NAV -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="250dp"
+        android:background="#FAFAFA"
+        app:menu="@menu/bottom_nav_menu" />
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.example.lifeguard;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,46 +18,61 @@ import com.google.firebase.database.ValueEventListener;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    TextView tvEmail, tvName;
+    TextView tvName, tvEmail, tvPhone;
+    Button btnLogout;
+
+    FirebaseAuth auth;
+    DatabaseReference userRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        tvName = findViewById(R.id.tvName);   // ✅ Initialize tvName
+        tvName = findViewById(R.id.tvName);
         tvEmail = findViewById(R.id.tvEmail);
+        tvPhone = findViewById(R.id.tvPhone);
+        btnLogout = findViewById(R.id.btnLogout);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
 
         if (user == null) {
-            finish(); // No logged-in user
+            finish();
             return;
         }
 
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-                .getReference("Users")
+        // Email from Auth
+        tvEmail.setText("Email: " + user.getEmail());
+
+        // DB reference
+        userRef = FirebaseDatabase.getInstance()
+                .getReference("users")
                 .child(user.getUid());
 
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String name = snapshot.child("name").getValue(String.class);
-                String email = snapshot.child("email").getValue(String.class);
+        // Fetch data
+        userRef.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        String phone = snapshot.child("phone").getValue(String.class);
 
-                if (name != null) tvName.setText(name);
-                if (email != null) tvEmail.setText(email);
-            }
+                        tvName.setText("Name: " + name);
+                        tvPhone.setText("Phone: " + phone);
+                    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Optional: handle errors
-            }
-        });
-        findViewById(R.id.btnLogout).setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(ProfileActivity.this, LoginActivity.class));
-            finish();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                }
+        );
+
+        // Logout
+        btnLogout.setOnClickListener(v -> {
+            auth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finishAffinity();
         });
     }
 }

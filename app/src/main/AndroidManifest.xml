@@ -32,13 +32,7 @@
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity
-            android:name=".SOSActivity"
-            android:exported="false" />
-        <activity
             android:name=".HistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AddEditContactActivity"
             android:exported="false" />
         <activity
             android:name=".ContactsActivity"
@@ -50,7 +44,7 @@
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

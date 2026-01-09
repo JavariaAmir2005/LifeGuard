@@ -4,7 +4,8 @@
     android:padding="24dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F1FAEE"> <!-- Calm Mint -->
+    android:background="#FAFAFA">
+
     <!-- Title -->
     <TextView
         android:id="@+id/tvTitle"
@@ -16,13 +17,17 @@
         android:gravity="center"
         android:textColor="#1D3557"/>
 
+
+
+
+
     <!-- Latitude -->
     <TextView
         android:id="@+id/tvLat"
         android:text="Latitude: --"
         android:textSize="18sp"
         android:textColor="#1D3557"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
@@ -45,34 +50,18 @@
         android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-
-    <!-- Get Location Button -->
-    <com.google.android.material.button.MaterialButton
-
+    <!-- Get Location (SECONDARY) -->
+    <Button
         android:id="@+id/btnGet"
         android:layout_width="match_parent"
-        android:background="@drawable/rounded_button"
         android:layout_height="63dp"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#1D3557"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="#1976D2"
         android:text="Get Location"
         android:textAlignment="center"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textColor="#FFFFFF" />
-
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnVoiceSOS"
-        android:layout_width="match_parent"
-        android:layout_height="66dp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#E63946"
-        android:background="@drawable/rounded_button"
-        android:text="Voice SOS"
-        android:textAlignment="center"
-        android:textSize="20dp"
-        android:textColor="#FFFFFF" />
-
     <!-- Loading Indicator -->
     <ProgressBar
         android:id="@+id/progressBar"
