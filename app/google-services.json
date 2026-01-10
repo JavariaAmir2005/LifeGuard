@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "489859602426",
+    "firebase_url": "https://lifegaurd-a2c17-default-rtdb.firebaseio.com",
+    "project_id": "lifegaurd-a2c17",
+    "storage_bucket": "lifegaurd-a2c17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489859602426:android:4b1c18e1b4aa98f3e0b643",
+        "android_client_info": {
+          "package_name": "com.example.lifeguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvu7Lf2d6pmEATZIUHStypEz0jU2j0Vs0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

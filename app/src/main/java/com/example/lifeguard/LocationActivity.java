@@ -1,5 +1,6 @@
 package com.example.lifeguard;
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -121,9 +122,15 @@ public class LocationActivity extends AppCompatActivity {
             } else {
                 tvAddr.setText("Address not found");
             }
+            // ✅ Pass address to next activity (CardView screen)
+            Intent intent = new Intent(LocationActivity.this, MainActivity.class);
+            String address = "address:";
+            intent.putExtra("user_address", address);
+            startActivity(intent);
         } catch (Exception e) {
             tvAddr.setText("Geocoder error");
         }
+
     }
 
     @Override

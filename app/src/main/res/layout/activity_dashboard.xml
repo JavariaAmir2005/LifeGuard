@@ -25,22 +25,6 @@
     <!-- Emergency Question -->
 
 
-    <ImageView
-        android:layout_width="500dp"
-        android:layout_height="364dp"
-        android:src="@drawable/pastel"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="-745dp"
-        tools:layout_editor_absoluteY="63dp" />
-
-    <ImageView
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:src="@drawable/red_circle"
-        tools:layout_editor_absoluteX="78dp"
-        tools:layout_editor_absoluteY="155dp"
-        tools:ignore="MissingConstraints" />
-
     <TextView
         android:id="@+id/tvEmergencyQuestion"
         android:layout_width="0dp"
@@ -110,15 +94,16 @@
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_profile_placeholder"
+                android:src="@drawable/profile"
                 android:scaleType="centerCrop"
                 android:layout_marginEnd="16dp"
-                android:background="@drawable/circle_background"/>
+                android:background="@drawable/profile"/>
 
             <TextView
+                android:id="@+id/tvUserLocation"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="151-171 Montclair Ave Newark, NJ 07104, USA"
+                android:text="Fetching location..."
                 android:textSize="16sp"
                 android:textColor="#000000"
                 android:layout_weight="1"/>

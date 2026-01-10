@@ -51,14 +51,11 @@ public class DashboardActivity extends AppCompatActivity {
 
 
         btnSOS = findViewById(R.id.btnSOS);
-        btnHistory = findViewById(R.id.btnHistory);
 
 
         btnSOS.setOnClickListener(v ->
               startSOS());
 
-        btnHistory.setOnClickListener(v ->
-                startActivity(new Intent(this, HistoryActivity.class)));
 
 
     }

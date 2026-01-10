@@ -4,13 +4,14 @@
     android:padding="24dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:background="#fae7e5">
 
     <!-- Title -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:text="SOS Location Tracker"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -27,7 +28,7 @@
         android:text="Latitude: --"
         android:textSize="18sp"
         android:textColor="#1D3557"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
@@ -37,7 +38,7 @@
         android:text="Longitude: --"
         android:textSize="18sp"
         android:textColor="#1D3557"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
@@ -47,29 +48,30 @@
         android:text="Address: --"
         android:textSize="18sp"
         android:textColor="#1D3557"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <!-- Get Location (SECONDARY) -->
-    <Button
-        android:id="@+id/btnGet"
-        android:layout_width="match_parent"
-        android:layout_height="63dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/rounded_button"
-        android:backgroundTint="#1976D2"
-        android:text="Get Location"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textColor="#FFFFFF" />
     <!-- Loading Indicator -->
     <ProgressBar
         android:id="@+id/progressBar"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="30dp"
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:indeterminateTint="#1D3557"/>
+
+    <Button
+        android:id="@+id/btnGet"
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="36dp"
+        android:backgroundTint="#d11603"
+        android:layout_gravity="center"
+        android:text="Get Location"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
 
 </LinearLayout>
