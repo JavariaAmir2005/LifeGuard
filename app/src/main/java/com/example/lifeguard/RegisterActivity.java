@@ -55,7 +55,7 @@ public class RegisterActivity extends AppCompatActivity {
                 etPassword.requestFocus();
                 return;
             }
-
+            
             // CREATE USER
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {

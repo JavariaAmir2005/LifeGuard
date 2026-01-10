@@ -1,70 +1,130 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
-    android:background="#FFF5F5"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#fae7e5">
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Welcome back,"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingHorizontal="24dp"/>
+
+
+    <!-- Emergency Question -->
+
+
+    <ImageView
+        android:layout_width="500dp"
+        android:layout_height="364dp"
+        android:src="@drawable/pastel"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="-745dp"
+        tools:layout_editor_absoluteY="63dp" />
+
+    <ImageView
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:src="@drawable/red_circle"
+        tools:layout_editor_absoluteX="78dp"
+        tools:layout_editor_absoluteY="155dp"
+        tools:ignore="MissingConstraints" />
 
     <TextView
-        android:text="LifeGuard Dashboard"
-        android:textSize="22sp"
+        android:id="@+id/tvEmergencyQuestion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Are you in emergency?"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#212121"
-        android:layout_marginBottom="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:textColor="#000000"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <Button
-        android:id="@+id/btnContacts"
-        android:text="Emergency Contacts"
-        android:backgroundTint="#1976D2"
-        android:textColor="#FFFFFF"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
+    <TextView
+        android:id="@+id/tvEmergencySubtext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Press the button below help will reach you soon."
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvEmergencyQuestion"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- SOS Button -->
+
+    <!-- Address Card -->
     <Button
         android:id="@+id/btnSOS"
-        android:text="Send SOS"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="12dp"
-        android:layout_width="130dp"
-        android:layout_height="130dp"/>
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:backgroundTint="#d11603"
+        android:gravity="center"
+        android:shape="oval"
+        android:text="SOS"
+        android:textColor="@android:color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvEmergencySubtext" />
 
-    <Button
-        android:id="@+id/VoiceSOS"
-        android:text="Voice SOS"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="12dp"
-        android:layout_width="130dp"
-        android:layout_height="130dp"/>
-
-
-    <Button
-        android:id="@+id/btnHistory"
-        android:text="Emergency History"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="#BDBDBD"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
-
-    <Button
-        android:id="@+id/btnProfile"
-        android:text="Profile"
-        android:layout_marginTop="14dp"
-        android:backgroundTint="#BDBDBD"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
-
-    <!-- BOTTOM NAV -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardAddress"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="250dp"
-        android:background="#FAFAFA"
-        app:menu="@menu/bottom_nav_menu" />
-</LinearLayout>
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:layout_constraintTop_toBottomOf="@id/btnSOS"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_profile_placeholder"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/circle_background"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="151-171 Montclair Ave Newark, NJ 07104, USA"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:layout_weight="1"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

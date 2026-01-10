@@ -11,6 +11,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.widget.Toast;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+
+import java.util.ArrayList;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,20 +36,23 @@ import java.util.Locale;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    MaterialButton btnContacts, btnSOS, btnHistory, btnProfile;
+    MaterialButton  btnSOS, btnHistory;
+    SpeechRecognizer speechRecognizer;
+    Intent speechIntent;
+    boolean isListening = false;
+
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        btnContacts = findViewById(R.id.btnContacts);
+        initVoiceSOS();
+
+
         btnSOS = findViewById(R.id.btnSOS);
         btnHistory = findViewById(R.id.btnHistory);
-        btnProfile = findViewById(R.id.btnProfile);
 
-        btnContacts.setOnClickListener(v ->
-                startActivity(new Intent(this, ContactsActivity.class)));
 
         btnSOS.setOnClickListener(v ->
               startSOS());
@@ -51,9 +60,100 @@ public class DashboardActivity extends AppCompatActivity {
         btnHistory.setOnClickListener(v ->
                 startActivity(new Intent(this, HistoryActivity.class)));
 
-        btnProfile.setOnClickListener(v ->
-                startActivity(new Intent(this, ProfileActivity.class)));
+
     }
+    private void startListening() {
+        if (!isListening) {
+            isListening = true;
+            speechRecognizer.startListening(speechIntent);
+        }
+    }
+
+    private void restartListening() {
+        isListening = false;
+        startListening();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
+    }
+
+    private void initVoiceSOS() {
+
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    300
+            );
+            return;
+        }
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+
+        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        );
+        speechIntent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE,
+                Locale.getDefault()
+        );
+
+        speechRecognizer.setRecognitionListener(
+                new RecognitionListener() {
+
+                    @Override public void onReadyForSpeech(Bundle params) {}
+                    @Override public void onBeginningOfSpeech() {}
+                    @Override public void onRmsChanged(float rmsdB) {}
+                    @Override public void onBufferReceived(byte[] buffer) {}
+                    @Override public void onEndOfSpeech() {}
+
+                    @Override
+                    public void onError(int error) {
+                        restartListening();
+                    }
+
+                    @Override
+                    public void onResults(Bundle results) {
+                        ArrayList<String> words =
+                                results.getStringArrayList(
+                                        SpeechRecognizer.RESULTS_RECOGNITION);
+
+                        if (words != null) {
+                            for (String word : words) {
+                                word = word.toLowerCase();
+
+                                if (word.contains("sos")
+                                        || word.contains("help")
+                                        || word.contains("emergency")) {
+
+                                    Toast.makeText(
+                                            DashboardActivity.this,
+                                            "Voice SOS detected!",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+
+                                    startSOS(); // 🔥 SAME SOS METHOD
+                                    break;
+                                }
+                            }
+                        }
+                        restartListening();
+                    }
+
+                    @Override public void onPartialResults(Bundle partialResults) {}
+                    @Override public void onEvent(int eventType, Bundle params) {}
+                }
+        );
+
+        startListening();
+    }
+
     private void startSOS() {
 
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+
+    <!-- Permissions -->
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
@@ -12,8 +14,6 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
 
-    <uses-permission android:name= "android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name= "android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -22,36 +22,26 @@
         android:roundIcon="@drawable/lg_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.lifeguard">
-        <activity
-            android:name=".SyncedContactsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".DashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".HistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ContactsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false" />
+
+        <!-- SplashActivity as launcher -->
         <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Other activities -->
+        <activity android:name=".LoginActivity" android:exported="false"/>
+        <activity android:name=".RegisterActivity" android:exported="false"/>
+        <activity android:name=".DashboardActivity" android:exported="false"/>
+        <activity android:name=".ProfileActivity" android:exported="false"/>
+        <activity android:name=".HistoryActivity" android:exported="false"/>
+        <activity android:name=".ContactsActivity" android:exported="false"/>
+        <activity android:name=".SyncedContactsActivity" android:exported="false"/>
+
     </application>
 
 </manifest>
