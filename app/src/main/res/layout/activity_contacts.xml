@@ -113,6 +113,8 @@
         android:background="@android:color/white"
         app:menu="@menu/bottom_nav_menu"
         app:labelVisibilityMode="labeled"
+        app:itemIconTint="#B71C1C"
+        app:itemTextColor="#B71C1C"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
