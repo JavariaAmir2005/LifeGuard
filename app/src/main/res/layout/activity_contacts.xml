@@ -1,74 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#F1FAEE"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFF5F5">
 
-    <TextView
-        android:text="Emergency Contact"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#1976D2"
-        android:layout_marginBottom="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <!-- TOP APP BAR -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#B71C1C"
+        app:title="Emergency Contact"
+        app:titleTextColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Contact Name -->
     <EditText
         android:id="@+id/etName"
         android:hint="Contact Name"
-        android:backgroundTint="#BDBDBD"
         android:textColor="#212121"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:padding="12dp"
+        android:layout_margin="20dp"
+        android:background="@drawable/field_background"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"/>
+
+    <!-- Phone Number -->
     <EditText
         android:id="@+id/etPhone"
         android:hint="Phone Number"
         android:inputType="phone"
-        android:backgroundTint="#BDBDBD"
         android:textColor="#212121"
-        android:layout_marginTop="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_marginTop="20dp"
+        android:layout_width="0dp"
+        android:layout_margin="20dp"
+        android:padding="12dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/field_background"
+        app:layout_constraintTop_toBottomOf="@id/etName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Add Contact Button -->
     <Button
         android:id="@+id/btnAdd"
         android:text="Add Contact"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#1976D2"
+        android:backgroundTint="#B71C1C"
         android:layout_marginTop="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="0dp"
+        android:layout_margin="40dp"
+        android:padding="10dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/etPhone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Search + Sync -->
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp">
+        android:layout_marginTop="15dp"
+        app:layout_constraintTop_toBottomOf="@id/btnAdd"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <EditText
             android:id="@+id/etSearch"
             android:hint="Search contacts"
-            android:backgroundTint="#BDBDBD"
             android:layout_weight="1"
+            android:background="@drawable/field_background"
+            android:layout_margin="12dp"
+            android:padding="10dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/btnSync"
-            android:text="Sync"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#1976D2"
-            android:layout_marginStart="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:backgroundTint="#B71C1C"
+            android:text="Sync"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
     <!-- Contacts List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewContacts"
-        android:layout_marginTop="18dp"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_marginTop="18dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"/>
 
-</LinearLayout>
+    <!-- BOTTOM NAV BAR -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

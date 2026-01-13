@@ -1,22 +1,43 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#FAFAFA"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFF5F5">
 
-    <TextView
-        android:id="@+id/tvHeading"
-        android:text="Synced Contacts"
-        android:textSize="24sp"
-        android:textColor="#1976D2"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerSyncedContacts"
+    <!-- TOP APP BAR -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-</LinearLayout>
+        android:layout_height="?attr/actionBarSize"
+        android:background="#B71C1C"
+        android:titleTextColor="@android:color/white"/>
+
+    <!-- SCROLLABLE CONTENT -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="56dp">
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSyncedContacts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <!-- BOTTOM NAVIGATION -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -38,8 +38,9 @@
         <activity android:name=".RegisterActivity" android:exported="false"/>
         <activity android:name=".DashboardActivity" android:exported="false"/>
         <activity android:name=".ProfileActivity" android:exported="false"/>
-        <activity android:name=".HistoryActivity" android:exported="false"/>
+        <activity android:name=".LocationActivity" android:exported="false" />
         <activity android:name=".ContactsActivity" android:exported="false"/>
+        <activity android:name=".EditProfileActivity" android:exported="false" />
         <activity android:name=".SyncedContactsActivity" android:exported="false"/>
 
     </application>

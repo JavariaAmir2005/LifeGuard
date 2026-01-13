@@ -1,0 +1,222 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF5F5">
+
+    <!-- TOP APP BAR -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#C62828"
+        android:title="Edit Profile"
+        android:titleTextColor="@color/white"/>
+
+    <!-- SCROLLABLE FORM -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="56dp"> <!-- leave space for bottom nav -->
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Name -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Name"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etName"
+                    android:hint="Enter name"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Email -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Email"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etEmail"
+                    android:hint="Enter email"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:inputType="textEmailAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Phone -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Phone"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etPhone"
+                    android:hint="Enter phone"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:inputType="phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Blood Group -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Blood Group"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etBloodGroup"
+                    android:hint="Enter blood group"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Allergies -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Allergies &amp; Reactions"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etAllergies"
+                    android:hint="Enter allergies"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Medicines -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Medicines"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etMedicines"
+                    android:hint="Enter medicines"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Medical Notes -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp">
+                <TextView
+                    android:text="Medical Notes"
+                    android:textSize="14sp"
+                    android:textColor="#1D3557"
+                    android:layout_marginBottom="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etMedicalNotes"
+                    android:hint="Enter notes"
+                    android:textSize="16sp"
+                    android:textColor="#1D3557"
+                    android:background="@drawable/field_background"
+                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Save Button -->
+            <Button
+                android:id="@+id/btnSave"
+                android:text="Save"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#C62828"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- BOTTOM NAVIGATION -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

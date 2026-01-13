@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -14,7 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SyncedContactsActivity extends AppCompatActivity {
+public class SyncedContactsActivity extends BaseActivity {
 
     RecyclerView recyclerView;
     ContactsAdapter adapter;
@@ -25,6 +26,11 @@ public class SyncedContactsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_synced_contacts);
+
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Synced Contacts");
+        setupNavBar();
 
         recyclerView = findViewById(R.id.recyclerSyncedContacts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

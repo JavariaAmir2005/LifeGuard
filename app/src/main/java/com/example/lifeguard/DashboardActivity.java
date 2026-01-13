@@ -4,22 +4,18 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
-import android.telephony.SmsManager;
-import android.widget.Toast;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
-
-import java.util.ArrayList;
-
+import android.telephony.SmsManager;
+import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,15 +26,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
-public class DashboardActivity extends AppCompatActivity {
+public class DashboardActivity extends BaseActivity {
 
-    MaterialButton  btnSOS, btnHistory;
+    MaterialButton btnSOS;
     SpeechRecognizer speechRecognizer;
-    Intent speechIntent;
+    RecognitionListener recognitionListener;
+    android.content.Intent speechIntent;
     boolean isListening = false;
 
     @SuppressLint("WrongViewCast")
@@ -47,18 +44,20 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        // Setup bottom navigation
+        setupNavBar();
+
+        // Initialize voice-activated SOS
         initVoiceSOS();
 
-
+        // SOS button
         btnSOS = findViewById(R.id.btnSOS);
-
-
-        btnSOS.setOnClickListener(v ->
-              startSOS());
-
-
-
+        btnSOS.setOnClickListener(v -> {
+            Toast.makeText(this, "SOS pressed! Attempting to get location...", Toast.LENGTH_SHORT).show();
+            startSOS();
+        });
     }
+
     private void startListening() {
         if (!isListening) {
             isListening = true;
@@ -70,223 +69,183 @@ public class DashboardActivity extends AppCompatActivity {
         isListening = false;
         startListening();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (speechRecognizer != null) {
-            speechRecognizer.destroy();
-        }
+        if (speechRecognizer != null) speechRecognizer.destroy();
     }
 
     private void initVoiceSOS() {
-
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    300
-            );
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 300);
             return;
         }
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-
         speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechIntent.putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        );
-        speechIntent.putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE,
-                Locale.getDefault()
-        );
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
-        speechRecognizer.setRecognitionListener(
-                new RecognitionListener() {
-
-                    @Override public void onReadyForSpeech(Bundle params) {}
-                    @Override public void onBeginningOfSpeech() {}
-                    @Override public void onRmsChanged(float rmsdB) {}
-                    @Override public void onBufferReceived(byte[] buffer) {}
-                    @Override public void onEndOfSpeech() {}
-
-                    @Override
-                    public void onError(int error) {
-                        restartListening();
-                    }
-
-                    @Override
-                    public void onResults(Bundle results) {
-                        ArrayList<String> words =
-                                results.getStringArrayList(
-                                        SpeechRecognizer.RESULTS_RECOGNITION);
-
-                        if (words != null) {
-                            for (String word : words) {
-                                word = word.toLowerCase();
-
-                                if (word.contains("sos")
-                                        || word.contains("help")
-                                        || word.contains("emergency")) {
-
-                                    Toast.makeText(
-                                            DashboardActivity.this,
-                                            "Voice SOS detected!",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-
-                                    startSOS(); // 🔥 SAME SOS METHOD
-                                    break;
-                                }
-                            }
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override public void onReadyForSpeech(Bundle params) {}
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+            @Override public void onError(int error) { restartListening(); }
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> words = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (words != null) {
+                    for (String word : words) {
+                        if (word.toLowerCase().contains("sos") ||
+                                word.toLowerCase().contains("help") ||
+                                word.toLowerCase().contains("emergency")) {
+                            Toast.makeText(DashboardActivity.this, "Voice SOS detected!", Toast.LENGTH_SHORT).show();
+                            startSOS();
+                            break;
                         }
-                        restartListening();
                     }
-
-                    @Override public void onPartialResults(Bundle partialResults) {}
-                    @Override public void onEvent(int eventType, Bundle params) {}
                 }
-        );
+                restartListening();
+            }
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
 
         startListening();
     }
 
     private void startSOS() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    101
-            );
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
             return;
         }
 
-        LocationManager lm =
-                (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        lm.requestSingleUpdate(
-                LocationManager.GPS_PROVIDER,
-                location -> handleSOS(location),
-                null
-        );
-    }
-    private String getTime() {
-
-        return new SimpleDateFormat(
-                "dd-MM-yyyy HH:mm:ss",
-                Locale.getDefault()
-        ).format(new Date());
-    }
-    private String getAddress(double lat, double lon) {
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         try {
-            Geocoder geocoder =
-                    new Geocoder(this, Locale.getDefault());
+            Location lastLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            List<Address> addresses =
-                    geocoder.getFromLocation(lat, lon, 1);
-
-            if (addresses != null && !addresses.isEmpty()) {
-                return addresses.get(0).getAddressLine(0);
+            if (lastLocation != null) {
+                handleSOS(lastLocation); // Send immediately if available
+            } else {
+                Toast.makeText(this, "Fetching GPS location, will send SOS shortly...", Toast.LENGTH_SHORT).show();
+                // Send SOS with null location after 5 seconds if GPS not available
+                new android.os.Handler().postDelayed(() -> handleSOS(null), 5000);
             }
 
-        } catch (Exception e) {
+            lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, location -> {
+                if (location != null) {
+                    handleSOS(location); // Override null if GPS found later
+                }
+            }, null);
+
+        } catch (SecurityException e) {
             e.printStackTrace();
+            handleSOS(null);
         }
 
-        return "Address not found";
+
     }
 
     private void handleSOS(Location location) {
+        String message;
+        double lat = 0, lon = 0;
 
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
+        if (location != null) {
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+            message = "🚨 SOS!\nMy location:\nLat: " + lat + ", Lng: " + lon;
+        } else {
+            message = "🚨 SOS!\nLocation unavailable!";
+        }
 
-        String address = getAddress(lat, lon);
-        String time = getTime();
-
-        saveSOS(lat, lon, address, time);
-        sendSMS("🚨 SOS!\n" + address);
-
-
-        Toast.makeText(this,
-                "SOS sent successfully",
-                Toast.LENGTH_LONG).show();
+        saveSOS(location);
+        sendSMSIntent(message);
     }
-    private void saveSOS(double lat, double lon, String address, String time) {
 
+    private void saveSOS(Location location) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
-        DatabaseReference sosRef =
-                FirebaseDatabase.getInstance()
-                        .getReference("SOS")
-                        .child(user.getUid());
+        DatabaseReference sosRef = FirebaseDatabase.getInstance().getReference("SOS").child(user.getUid());
 
+        String time = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
 
-        sosRef.child("latitude").setValue(lat);
-        sosRef.child("longitude").setValue(lon);
-        sosRef.child("address").setValue(address);
+        if (location != null) {
+            sosRef.child("latitude").setValue(location.getLatitude());
+            sosRef.child("longitude").setValue(location.getLongitude());
+        } else {
+            sosRef.child("latitude").setValue(null);
+            sosRef.child("longitude").setValue(null);
+        }
         sosRef.child("time").setValue(time);
-
-
     }
-    private void sendSMS(String message) {
 
-        if (checkSelfPermission(Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                    new String[]{Manifest.permission.SEND_SMS},
-                    200
-            );
+    private void sendSMSIntent(String message) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.SEND_SMS}, 102);
             return;
         }
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) return;
+        DatabaseReference contactRef = FirebaseDatabase.getInstance()
+                .getReference("Users")
+                .child(user.getUid())
+                .child("EmergencyContacts");
 
-        DatabaseReference contactRef =
-                FirebaseDatabase.getInstance()
-                        .getReference("users")
-                        .child(user.getUid())
-                        .child("emergencyContacts");
+        contactRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    Toast.makeText(DashboardActivity.this, "No emergency contacts found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-        SmsManager smsManager = SmsManager.getDefault();
-
-        contactRef.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        if (!snapshot.exists()) {
-                            Toast.makeText(DashboardActivity.this,
-                                    "No emergency contacts found",
-                                    Toast.LENGTH_SHORT).show();
-                            return;
+                for (DataSnapshot s : snapshot.getChildren()) {
+                    String phone = s.child("phone").getValue(String.class);
+                    if (phone != null && !phone.isEmpty()) {
+                        try {
+                            SmsManager.getDefault().sendTextMessage(phone, null, message, null, null);
+                        } catch (Exception e) {
+                            Toast.makeText(DashboardActivity.this, "Failed to send SMS: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-
-                        for (DataSnapshot s : snapshot.getChildren()) {
-                            String phone =
-                                    s.child("phone").getValue(String.class);
-
-                            if (phone != null)
-                                smsManager.sendTextMessage(
-                                        phone,
-                                        null,
-                                        message,
-                                        null,
-                                        null
-                                );
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
                     }
                 }
-        );
+                Toast.makeText(DashboardActivity.this, "SOS sent!", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(DashboardActivity.this, "Failed to read contacts: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 101 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startSOS();
+        }
+
+        if (requestCode == 300 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startListening();
+        }
+
+        if (requestCode == 102 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "SMS permission granted, press SOS again", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

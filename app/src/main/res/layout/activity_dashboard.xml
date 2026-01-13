@@ -2,10 +2,21 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fae7e5">
+    android:background="#FFF5F5">
+
+    <!-- TOP NAV BAR -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#B71C1C"
+        app:title="Home"
+        app:titleTextColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Welcome Text -->
     <TextView
@@ -15,16 +26,13 @@
         android:text="Welcome back,"
         android:textSize="18sp"
         android:textColor="#000000"
-        android:layout_marginTop="32dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="24dp"
+        android:paddingHorizontal="24dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:paddingHorizontal="24dp"/>
-
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Emergency Question -->
-
-
     <TextView
         android:id="@+id/tvEmergencyQuestion"
         android:layout_width="0dp"
@@ -53,62 +61,31 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- SOS Button -->
-
-    <!-- Address Card -->
     <Button
         android:id="@+id/btnSOS"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_gravity="center"
         android:layout_marginTop="40dp"
         android:backgroundTint="#d11603"
-        android:gravity="center"
-        android:shape="oval"
         android:text="SOS"
         android:textColor="@android:color/white"
         android:textSize="28sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintTop_toBottomOf="@id/tvEmergencySubtext"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvEmergencySubtext" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardAddress"
+    <!-- BOTTOM NAV BAR -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="32dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/btnSOS"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/profile"
-                android:scaleType="centerCrop"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/profile"/>
-
-            <TextView
-                android:id="@+id/tvUserLocation"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Fetching location..."
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:layout_weight="1"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 
 

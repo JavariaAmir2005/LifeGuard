@@ -2,7 +2,6 @@ package com.example.lifeguard;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -12,21 +11,27 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactsActivity extends AppCompatActivity {
+public class ContactsActivity extends BaseActivity {
 
     EditText etName, etPhone, etSearch;
     Button btnAdd, btnSync;
     RecyclerView recyclerView;
+    BottomNavigationView bottomNavigation;
 
     ContactsAdapter adapter;
     List<Contact> contacts;
@@ -38,26 +43,60 @@ public class ContactsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
+        setupNavBar(); // Nav bar setup
 
+        // Initialize views
         etName = findViewById(R.id.etName);
         etPhone = findViewById(R.id.etPhone);
         etSearch = findViewById(R.id.etSearch);
         btnAdd = findViewById(R.id.btnAdd);
         btnSync = findViewById(R.id.btnSync);
         recyclerView = findViewById(R.id.recyclerViewContacts);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+
         dbHelper = new DatabaseHelper(this);
-        contactsRef = FirebaseDatabase.getInstance().getReference("EmergencyContacts");
 
+        // Initialize RecyclerView
         contacts = new ArrayList<>();
-        loadContacts();
-
+        adapter = new ContactsAdapter(this, contacts, null);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ContactsAdapter(this, contacts, contactsRef);
         recyclerView.setAdapter(adapter);
 
+        // Setup Firebase reference safely
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            contactsRef = FirebaseDatabase.getInstance()
+                    .getReference("Users")
+                    .child(user.getUid())
+                    .child("EmergencyContacts");
+
+            adapter.contactsRef = contactsRef;
+
+            // Load contacts from Firebase
+            contactsRef.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    contacts.clear();
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        Contact c = ds.getValue(Contact.class);
+                        if (c != null) contacts.add(c);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(ContactsActivity.this, "Failed to load contacts", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "User not signed in. Firebase unavailable.", Toast.LENGTH_SHORT).show();
+        }
+
+        // Add contact button
         btnAdd.setOnClickListener(v -> addContact());
 
-
+        // Search filter
         etSearch.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence s, int st, int b, int c) {
                 adapter.filter(s.toString());
@@ -66,16 +105,18 @@ public class ContactsActivity extends AppCompatActivity {
             public void afterTextChanged(Editable e) {}
         });
 
-
+        // Sync contacts safely
         btnSync.setOnClickListener(v -> {
-            for(Contact c : contacts){
-                contactsRef.child(String.valueOf(c.getId())).setValue(c);
+            if (contactsRef != null) {
+                for (Contact c : contacts) {
+                    contactsRef.child(String.valueOf(c.getId())).setValue(c);
+                }
+                Toast.makeText(this, "Contacts Synced", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, SyncedContactsActivity.class));
+            } else {
+                Toast.makeText(this, "Cannot sync. User not signed in.", Toast.LENGTH_SHORT).show();
             }
-            Toast.makeText(this, "Contacts Synced", Toast.LENGTH_SHORT).show();
-
-            startActivity(new Intent(this, SyncedContactsActivity.class));
         });
-
     }
 
     private void addContact() {
@@ -93,25 +134,15 @@ public class ContactsActivity extends AppCompatActivity {
         contacts.add(c);
         adapter.notifyItemInserted(contacts.size() - 1);
 
-        contactsRef.child(String.valueOf(id)).setValue(c);
+        // Only update Firebase if available
+        if (contactsRef != null) {
+            contactsRef.child(String.valueOf(id)).setValue(c);
+        }
 
         etName.setText("");
         etPhone.setText("");
     }
 
-    private void loadContacts() {
-        Cursor cursor = dbHelper.getAllContacts();
-        while (cursor.moveToNext()) {
-            contacts.add(new Contact(
-                    cursor.getInt(0),
-                    cursor.getString(1),
-                    cursor.getString(2)
-            ));
-        }
-        cursor.close();
-    }
-
-    // ✅ EDIT DIALOG
     public void showEditDialog(Contact contact) {
         AlertDialog.Builder b = new AlertDialog.Builder(this);
         b.setTitle("Edit Contact");
@@ -134,9 +165,11 @@ public class ContactsActivity extends AppCompatActivity {
 
             contact.setName(name.getText().toString());
             contact.setPhone(phone.getText().toString());
-
             adapter.notifyDataSetChanged();
-            contactsRef.child(String.valueOf(contact.getId())).setValue(contact);
+
+            if (contactsRef != null) {
+                contactsRef.child(String.valueOf(contact.getId())).setValue(contact);
+            }
         });
 
         b.setNegativeButton("Cancel", null);

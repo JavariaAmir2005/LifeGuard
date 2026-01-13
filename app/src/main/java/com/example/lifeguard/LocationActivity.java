@@ -17,10 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.util.List;
 import java.util.Locale;
 
-public class LocationActivity extends AppCompatActivity {
+public class LocationActivity extends BaseActivity {
 
     private static final int REQ = 100;
 
@@ -38,6 +41,12 @@ public class LocationActivity extends AppCompatActivity {
         tvLat = findViewById(R.id.tvLat);
         tvLon = findViewById(R.id.tvLon);
         tvAddr = findViewById(R.id.tvAddr);
+        setupNavBar();
+
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("My Location");
+        BottomNavigationView navView = findViewById(R.id.bottomNavigation);
 
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -116,22 +125,17 @@ public class LocationActivity extends AppCompatActivity {
 
         Geocoder g = new Geocoder(this, Locale.getDefault());
         try {
-            List<Address> list = g.getFromLocation(lat, lon, 1);
+            List<android.location.Address> list = g.getFromLocation(lat, lon, 1);
             if (list != null && !list.isEmpty()) {
                 tvAddr.setText("Address: " + list.get(0).getAddressLine(0));
             } else {
                 tvAddr.setText("Address not found");
             }
-            // ✅ Pass address to next activity (CardView screen)
-            Intent intent = new Intent(LocationActivity.this, MainActivity.class);
-            String address = "address:";
-            intent.putExtra("user_address", address);
-            startActivity(intent);
         } catch (Exception e) {
             tvAddr.setText("Geocoder error");
         }
-
     }
+
 
     @Override
     public void onRequestPermissionsResult(int code, @NonNull String[] p, @NonNull int[] r) {
