@@ -18,10 +18,9 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="20dp"
         android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="56dp"> <!-- leave space for bottom nav -->
-
+        android:layout_marginBottom="56dp"
+        android:padding="20dp">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -213,7 +212,7 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@android:color/white"
         app:menu="@menu/bottom_nav_menu"

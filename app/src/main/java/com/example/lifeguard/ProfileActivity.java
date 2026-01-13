@@ -45,7 +45,8 @@ public class ProfileActivity extends BaseActivity {
 
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
-            finish(); // return to login screen
+            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);// return to login screen
+            startActivity(intent);
         });
 
         btnEditProfile.setOnClickListener(v ->
