@@ -81,6 +81,7 @@ public class ContactsActivity extends BaseActivity {
                         Contact c = ds.getValue(Contact.class);
                         if (c != null) contacts.add(c);
                     }
+                    adapter.updateFullList();
                     adapter.notifyDataSetChanged();
                 }
 

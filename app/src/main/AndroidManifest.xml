@@ -18,8 +18,8 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/lg_icon"
-        android:roundIcon="@drawable/lg_icon"
+        android:icon="@drawable/logo2"
+        android:roundIcon="@drawable/logo2"
         android:supportsRtl="true"
         android:theme="@style/Theme.lifeguard">
 

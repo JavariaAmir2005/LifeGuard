@@ -3,6 +3,9 @@ package com.example.lifeguard;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +23,7 @@ public class SyncedContactsActivity extends BaseActivity {
     RecyclerView recyclerView;
     ContactsAdapter adapter;
     List<Contact> contacts;
+
     DatabaseReference contactsRef;
 
     @Override
@@ -39,7 +43,19 @@ public class SyncedContactsActivity extends BaseActivity {
         adapter = new ContactsAdapter(this, contacts, null); // FirebaseRef not needed here
         recyclerView.setAdapter(adapter);
 
-        contactsRef = FirebaseDatabase.getInstance().getReference("EmergencyContacts");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+            contactsRef = FirebaseDatabase.getInstance()
+                    .getReference("Users")
+                    .child(user.getUid())
+                    .child("EmergencyContacts");
+
+            loadSyncedContacts();
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
 
         loadSyncedContacts();
     }
@@ -53,5 +69,8 @@ public class SyncedContactsActivity extends BaseActivity {
             }
             adapter.notifyDataSetChanged();
         }).addOnFailureListener(e -> Toast.makeText(this, "Failed to load synced contacts", Toast.LENGTH_SHORT).show());
+
+
+
     }
 }

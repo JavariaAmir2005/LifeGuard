@@ -19,16 +19,22 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
 
     Context context;
     List<Contact> contactList;
-    List<Contact> fullList; // for search
+    List<Contact> fullList;
     DatabaseHelper dbHelper;
     DatabaseReference contactsRef;
 
     public ContactsAdapter(Context context, List<Contact> list, DatabaseReference ref) {
         this.context = context;
         this.contactList = list;
-        this.fullList = new ArrayList<>(list);
+        this.fullList = new ArrayList<>();
         this.contactsRef = ref;
         this.dbHelper = new DatabaseHelper(context);
+    }
+
+    // 🔥 MUST be called after Firebase reload
+    public void updateFullList() {
+        fullList.clear();
+        fullList.addAll(contactList);
     }
 
     @NonNull
@@ -46,7 +52,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         h.tvName.setText(c.getName());
         h.tvPhone.setText(c.getPhone());
 
-
         h.itemView.setOnLongClickListener(v -> {
             new AlertDialog.Builder(context)
                     .setTitle("Contact Options")
@@ -55,8 +60,13 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
                             ((ContactsActivity) context).showEditDialog(c);
                         } else {
                             dbHelper.deleteContact(c.getId());
-                            contactsRef.child(String.valueOf(c.getId())).removeValue();
+
+                            if (contactsRef != null) {
+                                contactsRef.child(String.valueOf(c.getId())).removeValue();
+                            }
+
                             contactList.remove(position);
+                            updateFullList();
                             notifyItemRemoved(position);
                         }
                     }).show();
@@ -71,11 +81,14 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
 
     public void filter(String text) {
         contactList.clear();
+
         if (text.isEmpty()) {
             contactList.addAll(fullList);
         } else {
+            text = text.toLowerCase();
             for (Contact c : fullList) {
-                if (c.getName().toLowerCase().contains(text.toLowerCase())) {
+                if (c.getName().toLowerCase().contains(text) ||
+                        c.getPhone().contains(text)) {
                     contactList.add(c);
                 }
             }
