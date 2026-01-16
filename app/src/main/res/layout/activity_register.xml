@@ -58,7 +58,8 @@
         android:autofillHints="password"
         android:textColor="#880E4F"
         android:textSize="16sp"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="24dp"
+        android:drawableEnd="@drawable/ic_eye_close"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRegister"

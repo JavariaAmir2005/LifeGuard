@@ -48,7 +48,8 @@
         android:padding="12dp"
         android:textColor="#880E4F"
         android:textColorHint="#B0BEC5"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:drawableEnd="@drawable/ic_eye_close" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
