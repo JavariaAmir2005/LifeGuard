@@ -4,8 +4,12 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -29,14 +33,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
-public class DashboardActivity extends BaseActivity {
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+public  class DashboardActivity extends BaseActivity implements SensorEventListener {
 
     MaterialButton btnSOS;
     SpeechRecognizer speechRecognizer;
     RecognitionListener recognitionListener;
     android.content.Intent speechIntent;
     boolean isListening = false;
+
+    SensorManager sensorManager;
+    Sensor accelerometer;
+    final float SHAKE_THRESHOLD = 2.7f; // adjust for sensitivity
+    long lastShakeTime = 0;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -47,112 +60,123 @@ public class DashboardActivity extends BaseActivity {
         // Setup bottom navigation
         setupNavBar();
 
-        // Initialize voice-activated SOS
-        initVoiceSOS();
-
         // SOS button
         btnSOS = findViewById(R.id.btnSOS);
         btnSOS.setOnClickListener(v -> {
             Toast.makeText(this, "SOS pressed! Attempting to get location...", Toast.LENGTH_SHORT).show();
             startSOS();
         });
-    }
 
-    private void startListening() {
-        if (!isListening) {
-            isListening = true;
-            speechRecognizer.startListening(speechIntent);
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager != null ? sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) : null;
+
+        if (accelerometer != null) {
+            Toast.makeText(this, "Device has an accelerometer!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No accelerometer detected.", Toast.LENGTH_LONG).show();
         }
+
     }
 
-    private void restartListening() {
-        isListening = false;
-        startListening();
+    // ---------------- Shake detection ----------------
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (sensorManager != null && accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (speechRecognizer != null) speechRecognizer.destroy();
+    protected void onPause() {
+        super.onPause();
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
     }
 
-    private void initVoiceSOS() {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 300);
-            return;
-        }
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER) return;
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        float x = event.values[0];
+        float y = event.values[1];
+        float z = event.values[2];
 
-        speechRecognizer.setRecognitionListener(new RecognitionListener() {
-            @Override public void onReadyForSpeech(Bundle params) {}
-            @Override public void onBeginningOfSpeech() {}
-            @Override public void onRmsChanged(float rmsdB) {}
-            @Override public void onBufferReceived(byte[] buffer) {}
-            @Override public void onEndOfSpeech() {}
-            @Override public void onError(int error) { restartListening(); }
-            @Override
-            public void onResults(Bundle results) {
-                ArrayList<String> words = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                if (words != null) {
-                    for (String word : words) {
-                        if (word.toLowerCase().contains("sos") ||
-                                word.toLowerCase().contains("help") ||
-                                word.toLowerCase().contains("emergency")) {
-                            Toast.makeText(DashboardActivity.this, "Voice SOS detected!", Toast.LENGTH_SHORT).show();
-                            startSOS();
-                            break;
-                        }
-                    }
-                }
-                restartListening();
+        float gX = x / SensorManager.GRAVITY_EARTH;
+        float gY = y / SensorManager.GRAVITY_EARTH;
+        float gZ = z / SensorManager.GRAVITY_EARTH;
+
+        float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
+
+        if (gForce > SHAKE_THRESHOLD) {
+            long now = System.currentTimeMillis();
+            if (now - lastShakeTime > 1000) { // 1 sec cooldown
+                lastShakeTime = now;
+                Toast.makeText(this, "Shake detected! Sending SOS...", Toast.LENGTH_SHORT).show();
+                startSOS();
             }
-            @Override public void onPartialResults(Bundle partialResults) {}
-            @Override public void onEvent(int eventType, Bundle params) {}
-        });
-
-        startListening();
+        }
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
     private void startSOS() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) return;
-
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
             return;
         }
 
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        try {
-            Location lastLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        boolean gps = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean net = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            if (lastLocation != null) {
-                handleSOS(lastLocation); // Send immediately if available
-            } else {
-                Toast.makeText(this, "Fetching GPS location, will send SOS shortly...", Toast.LENGTH_SHORT).show();
-                // Send SOS with null location after 5 seconds if GPS not available
-                new android.os.Handler().postDelayed(() -> handleSOS(null), 5000);
+        Toast.makeText(this, "Getting location...", Toast.LENGTH_SHORT).show();
+
+        Handler timeoutHandler = new Handler();
+
+        LocationListener listener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                lm.removeUpdates(this);
+                timeoutHandler.removeCallbacksAndMessages(null);
+                handleSOS(location); // ✅ ALWAYS fires now
+            }
+        };
+
+        // Timeout (fallback)
+        timeoutHandler.postDelayed(() -> {
+            lm.removeUpdates(listener);
+            handleSOS(null);
+        }, 8000);
+
+        try {
+            if (net) {
+                lm.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER,
+                        0,
+                        0,
+                        listener
+                );
             }
 
-            lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, location -> {
-                if (location != null) {
-                    handleSOS(location); // Override null if GPS found later
-                }
-            }, null);
+            if (gps) {
+                lm.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        0,
+                        0,
+                        listener
+                );
+            }
 
-        } catch (SecurityException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             handleSOS(null);
         }
-
-
     }
+
 
     private void handleSOS(Location location) {
         String message;
@@ -161,7 +185,9 @@ public class DashboardActivity extends BaseActivity {
         if (location != null) {
             lat = location.getLatitude();
             lon = location.getLongitude();
-            message = "🚨 SOS!\nMy location:\nLat: " + lat + ", Lng: " + lon;
+            message = "🚨 SOS!\nMy location:\nhttps://maps.google.com/?q="
+                    + lat + "," + lon;
+
         } else {
             message = "🚨 SOS!\nLocation unavailable!";
         }
@@ -241,11 +267,12 @@ public class DashboardActivity extends BaseActivity {
         }
 
         if (requestCode == 300 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startListening();
+
         }
 
         if (requestCode == 102 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "SMS permission granted, press SOS again", Toast.LENGTH_SHORT).show();
         }
     }
+
 }
