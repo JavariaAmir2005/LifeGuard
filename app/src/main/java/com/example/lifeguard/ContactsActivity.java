@@ -172,7 +172,6 @@ public class ContactsActivity extends BaseActivity {
                 contactsRef.child(String.valueOf(contact.getId())).setValue(contact);
             }
         });
-
         b.setNegativeButton("Cancel", null);
         b.show();
     }

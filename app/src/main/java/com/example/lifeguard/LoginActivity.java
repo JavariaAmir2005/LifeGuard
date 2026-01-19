@@ -109,9 +109,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         });
-
         /* ---------------- REGISTER TEXT ---------------- */
-
         btnRegister.setOnClickListener(v ->
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class))
         );

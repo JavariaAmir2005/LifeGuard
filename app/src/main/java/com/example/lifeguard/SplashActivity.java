@@ -34,6 +34,7 @@ public class SplashActivity extends AppCompatActivity {
         logo.startAnimation(fade);
         title.startAnimation(fade);
 
+
         // Delay navigation by 3 seconds
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             Intent intent;

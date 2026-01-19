@@ -95,7 +95,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         }
         notifyDataSetChanged();
     }
-
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvPhone;
 

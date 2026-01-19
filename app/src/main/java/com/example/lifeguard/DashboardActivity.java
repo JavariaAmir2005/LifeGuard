@@ -255,7 +255,6 @@ public  class DashboardActivity extends BaseActivity implements SensorEventListe
             }
         });
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,

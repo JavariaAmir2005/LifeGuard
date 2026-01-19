@@ -15,7 +15,6 @@ public class Contact {
         this.name = name;
         this.phone = phone;
     }
-
     // Getters
     public int getId() { return id; }
     public String getName() { return name; }

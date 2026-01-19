@@ -103,10 +103,10 @@ public class RegisterActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
 
-                            // ✅ Only now get UID
+
                             String uid = mAuth.getCurrentUser().getUid();
 
-                            // ✅ Save name & email to Firebase
+
                             DatabaseReference ref = FirebaseDatabase.getInstance()
                                     .getReference("Users")
                                     .child(uid);

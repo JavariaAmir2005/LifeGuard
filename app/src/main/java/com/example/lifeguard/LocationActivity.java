@@ -30,7 +30,6 @@ public class LocationActivity extends BaseActivity {
     TextView tvLat, tvLon, tvAddr;
     LocationManager lm;
     AlertDialog loadingDialog;
-
     Handler timeoutHandler = new Handler();
 
     @Override

@@ -96,7 +96,6 @@ public class EditProfileActivity extends BaseActivity {
                 etMedicines.getText().toString().trim(),
                 etMedicalNotes.getText().toString().trim()
         );
-
         ref.setValue(updatedUser)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
