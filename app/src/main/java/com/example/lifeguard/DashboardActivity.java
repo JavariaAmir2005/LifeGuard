@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DashboardActivity extends BaseActivity implements SensorEventListener {
-
     MaterialButton btnSOS;
     SensorManager sensorManager;
     Sensor accelerometer;
