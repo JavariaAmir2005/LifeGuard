@@ -1,5 +1,6 @@
 package com.example.lifeguard;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -65,6 +66,7 @@ public class ProfileActivity extends BaseActivity {
                 .child(currentUser.getUid());
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
