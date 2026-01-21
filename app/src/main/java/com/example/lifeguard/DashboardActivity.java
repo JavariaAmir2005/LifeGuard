@@ -39,7 +39,6 @@ import java.util.Locale;
 
 public class DashboardActivity extends BaseActivity implements SensorEventListener {
     MaterialButton btnSOS;
-
     // Shake Detection
     SensorManager sensorManager;
     Sensor accelerometer;
