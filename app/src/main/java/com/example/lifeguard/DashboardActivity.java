@@ -16,9 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.PhoneStateListener;
-import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -26,11 +24,7 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,49 +33,42 @@ import java.util.Locale;
 
 public class DashboardActivity extends BaseActivity implements SensorEventListener {
     MaterialButton btnSOS;
-    // Shake Detection
     SensorManager sensorManager;
     Sensor accelerometer;
     final float SHAKE_THRESHOLD = 2.7f;
     long lastShakeTime = 0;
 
-    // Sequential Calling
-    ArrayList<String> callNumbers = new ArrayList<>();
-    int currentCallIndex = 0;
+    private ArrayList<String> emergencyNumbers = new ArrayList<>();
+    private int currentCallIndex = 0;
+    private boolean someoneAnswered = false;
+    private boolean isSOSRunning = false;
+
     TelephonyManager telephonyManager;
     PhoneStateListener phoneStateListener;
-
-    boolean isCallAnswered = false;
-    boolean hasListenerRegistered = false; // Fix for listener crash
+    Handler callTimeoutHandler = new Handler();
+    Runnable callTimeoutRunnable;
 
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-
         setupNavBar();
 
         btnSOS = findViewById(R.id.btnSOS);
-        btnSOS.setOnClickListener(v -> {
-            Toast.makeText(this, "SOS pressed! Attempting to get location...", Toast.LENGTH_SHORT).show();
-            startSOS();
-        });
+        btnSOS.setOnClickListener(v -> startSOS());
 
-        // Shake
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager != null ? sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) : null;
 
-        // Telephony
         telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (sensorManager != null && accelerometer != null) {
+        if (sensorManager != null && accelerometer != null)
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        }
     }
 
     @Override
@@ -92,57 +79,46 @@ public class DashboardActivity extends BaseActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float x = event.values[0], y = event.values[1], z = event.values[2];
-        float gX = x / SensorManager.GRAVITY_EARTH;
-        float gY = y / SensorManager.GRAVITY_EARTH;
-        float gZ = z / SensorManager.GRAVITY_EARTH;
-        float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
+        float gForce = (float) Math.sqrt(
+                Math.pow(event.values[0] / SensorManager.GRAVITY_EARTH, 2) +
+                        Math.pow(event.values[1] / SensorManager.GRAVITY_EARTH, 2) +
+                        Math.pow(event.values[2] / SensorManager.GRAVITY_EARTH, 2));
 
-        if (gForce > SHAKE_THRESHOLD) {
-            long now = System.currentTimeMillis();
-            if (now - lastShakeTime > 1000) {
-                lastShakeTime = now;
-                Toast.makeText(this, "Shake detected! Sending SOS...", Toast.LENGTH_SHORT).show();
-                startSOS();
-            }
+        if (gForce > SHAKE_THRESHOLD && System.currentTimeMillis() - lastShakeTime > 1000) {
+            lastShakeTime = System.currentTimeMillis();
+            startSOS();
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
-    // ---------------- SOS ----------------
     private void startSOS() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        // Reset previous SOS state
+        callTimeoutHandler.removeCallbacksAndMessages(null);
+        isSOSRunning = true;
+        someoneAnswered = false;
+        currentCallIndex = 0;
+
+        // Request location
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
             return;
         }
 
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        boolean gps = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean net = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
         Handler timeoutHandler = new Handler();
-        LocationListener listener = new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                timeoutHandler.removeCallbacksAndMessages(null);
-                handleSOS(location);
-                if (ActivityCompat.checkSelfPermission(DashboardActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                    lm.removeUpdates(this);
-            }
+        LocationListener listener = location -> {
+            timeoutHandler.removeCallbacksAndMessages(null);
+            handleSOS(location);
         };
-
-        timeoutHandler.postDelayed(() -> {
-            handleSOS(null);
-            if (ActivityCompat.checkSelfPermission(DashboardActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                lm.removeUpdates(listener);
-        }, 8000);
+        timeoutHandler.postDelayed(() -> handleSOS(null), 8000);
 
         try {
-            if (net) lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
-            if (gps) lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
+            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
         } catch (Exception e) {
             handleSOS(null);
         }
@@ -159,8 +135,8 @@ public class DashboardActivity extends BaseActivity implements SensorEventListen
         }
 
         saveSOS(location);
-        sendSMS(message);
-        startSequentialCalling();
+        sendSMSIntent(message);
+        loadContactsAndCall();
     }
 
     private void saveSOS(Location location) {
@@ -175,32 +151,29 @@ public class DashboardActivity extends BaseActivity implements SensorEventListen
         sosRef.child("time").setValue(time);
     }
 
-    private void sendSMS(String message) {
+    private void sendSMSIntent(String message) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 102);
-            return;
-        }
 
         DatabaseReference ref = FirebaseDatabase.getInstance()
                 .getReference("Users").child(user.getUid()).child("EmergencyContacts");
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot s : snapshot.getChildren()) {
                     String phone = s.child("phone").getValue(String.class);
                     if (phone != null)
-                        SmsManager.getDefault().sendTextMessage(phone, null, message, null, null);
+                        android.telephony.SmsManager.getDefault().sendTextMessage(phone, null, message, null, null);
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
-    // ---------------- Sequential Calling ----------------
-    private void startSequentialCalling() {
+    private void loadContactsAndCall() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
@@ -208,77 +181,79 @@ public class DashboardActivity extends BaseActivity implements SensorEventListen
                 .getReference("Users").child(user.getUid()).child("EmergencyContacts");
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
-                callNumbers.clear();
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                emergencyNumbers.clear();
                 for (DataSnapshot s : snapshot.getChildren()) {
                     String phone = s.child("phone").getValue(String.class);
-                    if (phone != null) callNumbers.add(phone);
+                    if (phone != null) emergencyNumbers.add(phone);
                 }
 
-                if (!callNumbers.isEmpty()) {
-                    currentCallIndex = 0;
-                    isCallAnswered = false;
-                    registerCallListenerOnce();
-                    callNextNumber();
+                if (!emergencyNumbers.isEmpty()) {
+                    setupCallListener();
+                    callNextContact();
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
-    private void callNextNumber() {
-        if (currentCallIndex >= callNumbers.size()) return;
+    private void callNextContact() {
+        if (!isSOSRunning || someoneAnswered || currentCallIndex >= emergencyNumbers.size())
+            return;
+
+        String number = emergencyNumbers.get(currentCallIndex);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, 201);
             return;
         }
 
-        String number = callNumbers.get(currentCallIndex);
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + number));
         startActivity(intent);
+
+        callTimeoutRunnable = () -> {
+            if (!someoneAnswered) {
+                currentCallIndex++;
+                callNextContact();
+            }
+        };
+        callTimeoutHandler.postDelayed(callTimeoutRunnable, 25000); // 25s timeout
     }
 
-    private void registerCallListenerOnce() {
-        if (hasListenerRegistered) return;
+    private void setupCallListener() {
+        if (phoneStateListener != null) return;
 
         phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
-
                 if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                    isCallAnswered = true;
+                    someoneAnswered = true;
+                    isSOSRunning = false;
+                    callTimeoutHandler.removeCallbacks(callTimeoutRunnable);
                 }
 
-                if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    if (!isCallAnswered) {
-                        currentCallIndex++;
-                        callNextNumber();
-                    } else {
-                        // SOS completed
-                        currentCallIndex = callNumbers.size();
-                        isCallAnswered = false;
-                    }
+                if (state == TelephonyManager.CALL_STATE_IDLE && !someoneAnswered) {
+                    callTimeoutHandler.removeCallbacks(callTimeoutRunnable);
+                    currentCallIndex++;
+                    callNextContact();
                 }
             }
         };
 
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-        hasListenerRegistered = true;
     }
 
-    // ---------------- Permissions ----------------
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == 101 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            startSOS();
-        if (requestCode == 102 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            Toast.makeText(this, "SMS Permission Granted", Toast.LENGTH_SHORT).show();
-        if (requestCode == 201 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            callNextNumber();
+        if ((requestCode == 201 || requestCode == 101) && grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            callNextContact();
+        }
     }
 }
