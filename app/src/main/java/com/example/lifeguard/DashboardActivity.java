@@ -265,10 +265,6 @@ public  class DashboardActivity extends BaseActivity implements SensorEventListe
             startSOS();
         }
 
-        if (requestCode == 300 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-        }
-
         if (requestCode == 102 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "SMS permission granted, press SOS again", Toast.LENGTH_SHORT).show();
         }
