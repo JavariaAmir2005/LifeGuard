@@ -10,9 +10,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Handler;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.telephony.SmsManager;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -41,10 +38,7 @@ import android.hardware.SensorManager;
 public  class DashboardActivity extends BaseActivity implements SensorEventListener {
 
     MaterialButton btnSOS;
-    SpeechRecognizer speechRecognizer;
-    RecognitionListener recognitionListener;
-    android.content.Intent speechIntent;
-    boolean isListening = false;
+
 
     SensorManager sensorManager;
     Sensor accelerometer;
@@ -265,9 +259,6 @@ public  class DashboardActivity extends BaseActivity implements SensorEventListe
             startSOS();
         }
 
-        if (requestCode == 300 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-        }
 
         if (requestCode == 102 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "SMS permission granted, press SOS again", Toast.LENGTH_SHORT).show();
